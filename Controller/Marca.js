@@ -69,8 +69,8 @@ router.get('/AgregarProducto', parser, async (req, res) =>{
 router.get('/BorrarProducto', parser, async (req, res) =>{
     try{
 
-        const id = req.body.id;
-        const idProducto = req.body.idProducto;
+        const id = req.query.id;
+        const idProducto = req.query.idProducto;
 
         deleteProducto(id, idProducto);
         res.json("Se elimino el producto");
@@ -84,7 +84,7 @@ router.get('/BorrarProducto', parser, async (req, res) =>{
 router.get('/ListadoProducto', parser, async (req, res) =>{
     try{
 
-        const id = req.body.id;
+        const id = req.query.id;
 
         getProducto(id, res);
     
@@ -98,12 +98,12 @@ router.get('/ListadoProducto', parser, async (req, res) =>{
 router.get('/ModificarProducto', parser, async (req, res) =>{
     try{
 
-        const id = req.body.id;
-        const categoriaProducto = req.body.categoriaProducto;
-        const nameProducto = req.body.nameProducto;
-        const precioProducto = req.body.precioProducto;
-        const tipoDeProducto = req.body.tipoDeProducto;
-        const idProducto = req.body.idProducto;
+        const id = req.query.id;
+        const categoriaProducto = req.query.categoriaProducto;
+        const nameProducto = req.query.nameProducto;
+        const precioProducto = req.query.precioProducto;
+        const tipoDeProducto = req.query.tipoDeProducto;
+        const idProducto = req.query.idProducto;
         
 
         validacion = await encontreProducto(nameProducto, id);
@@ -165,7 +165,8 @@ async function setProducto(id, categoriaProducto, nameProducto, precioProducto, 
         categoriaProducto: categoriaProducto,
         nameProducto : nameProducto,
         precioProducto : precioProducto,
-        tipoDeProducto : tipoDeProducto
+        tipoDeProducto : tipoDeProducto,
+        idProducto : idProducto
     });
 }
 
@@ -174,7 +175,8 @@ async function modifyProducto(id, categoriaProducto, nameProducto, precioProduct
         categoriaProducto: categoriaProducto,
         nameProducto : nameProducto,
         precioProducto : precioProducto,
-        tipoDeProducto : tipoDeProducto
+        tipoDeProducto : tipoDeProducto,
+        idProducto : idProducto
     });
 }
 
@@ -262,10 +264,10 @@ module.exports = router;
 
 // 
 
-//http://localhost:7000/BorrarProducto/?id=634643643&nameProducto=remeraceleste
+//http://localhost:8000/BorrarProducto/?id=634643643&nameProducto=remeraceleste
 
-//http://localhost:7000/ListadoProducto/?id=634643643
+//http://localhost:8000/ListadoProducto/?id=634643643
 
-//http://localhost:7000/AgregarProducto/?id=653656563&categoriaProducto=ropa&nameProducto=remerabasica&precioProducto=500&tipoDeProducto=remera
+//http://localhost:8000/AgregarProducto/?id=634643643&categoriaProducto=ropa&nameProducto=remeraprueba&precioProducto=500&tipoDeProducto=remera&idProducto=jfbsdfbsd
 
-//http://localhost:7000/ModificarProducto/?id=634643643&categoriaProducto=ropa&nameProducto=remerabasica&precioProducto=500&tipoDeProducto=remera&idProducto=aNV4JhIYw07hU8RxTwNA
+//http://localhost:8000/ModificarProducto/?id=634643643&categoriaProducto=ropa&nameProducto=remerabasica&precioProducto=500&tipoDeProducto=remera&idProducto=aNV4JhIYw07hU8RxTwNA
