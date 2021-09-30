@@ -1,5 +1,6 @@
 const db = require('../DB/FirebaseConnection');
 const express = require('express');
+var cors = require('cors');
 const ComponentObject = require("../models/ComponentObject");
 const router = express.Router();
 

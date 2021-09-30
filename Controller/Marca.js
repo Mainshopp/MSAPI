@@ -1,25 +1,29 @@
 const db = require('../DB/FirebaseConnection');
 const express = require('express');
+var cors = require('cors');
+var app = express();
 const bodyParser = require("body-parser");
 const marcaObject= require("../models/marcaObject");
-const router = express.Router();  
+const router = express.Router();
+
+app.use(cors());
 
 var parser = express.json();
 parser = express.urlencoded({extended: true});
 
-router.get('/MarcaRegistro', parser, async (req, res) =>{
+router.post('/MarcaRegistro', parser, async (req, res) =>{
     try{
-        const id = req.query.id;
-        const name = req.query.name;
-        const password = req.query.password;
-        const email = req.query.email;
-        const categoria = req.query.categoria;
-        const cuit = req.query.cuit;
-        const razonSocial = req.query.razonSocial;
-        const condicionFrenteAlIva = req.query.condicionFrenteAlIva;
-        const numeroIngresosBrutos = req.query.numeroIngresosBrutos;
-        const suscripcion = req.query.suscripcion;
-        const idPlantilla = req.query.idPlantilla;
+        const id = req.body.id;
+        const name = req.body.name;
+        const password = req.body.password;
+        const email = req.body.email;
+        const categoria = req.body.categoria;
+        const cuit = req.body.cuit;
+        const razonSocial = req.body.razonSocial;
+        const condicionFrenteAlIva = req.body.condicionFrenteAlIva;
+        const numeroIngresosBrutos = req.body.numeroIngresosBrutos;
+        const suscripcion = req.body.suscripcion;
+        const idPlantilla = req.body.idPlantilla;
 
 
         
@@ -31,7 +35,7 @@ router.get('/MarcaRegistro', parser, async (req, res) =>{
             res.json("Se registro correctamente");
         }
         else{
-            res.json ("La marca ya existe");
+            res.json("La marca ya existe");
         }
         }catch(error){
         console.log(error);
@@ -40,21 +44,25 @@ router.get('/MarcaRegistro', parser, async (req, res) =>{
 })
 
 
-router.get('/AgregarProducto', parser, async (req, res) =>{
+router.post('/AgregarProducto', parser, async (req, res) =>{
     try{
 
-        const id = req.query.id;
-        const categoriaProducto = req.query.categoriaProducto;
-        const nameProducto = req.query.nameProducto;
-        const precioProducto = req.query.precioProducto;
-        const tipoDeProducto = req.query.tipoDeProducto;
-        const idProducto = req.query.idProducto;
+        const id = req.body.id;
+        const categoriaProducto = req.body.categoriaProducto;
+        const nameProducto = req.body.nameProducto;
+        const precioProducto = req.body.precioProducto;
+        const tipoDeProducto = req.body.tipoDeProducto;
+        const idProducto = req.body.idProducto;
 
         validacion = await encontreProducto(nameProducto, id);
         console.log(validacion);
 
         if(validacion == false) {
             setProducto(id, categoriaProducto, nameProducto, precioProducto, tipoDeProducto, idProducto);
+            response.setHeader("Access-Control-Allow-Origin", "*");
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+            response.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
+            response.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
             res.json("Se agregó el producto");
         } else {
             res.json("El nombre del producto que quiere agregar ya existe");
@@ -66,11 +74,15 @@ router.get('/AgregarProducto', parser, async (req, res) =>{
 
 })
 
-router.get('/BorrarProducto', parser, async (req, res) =>{
+router.get('/ping', parser, async (req, res) =>{
+    res.send("pong");
+})
+
+router.delete('/BorrarProducto', parser, async (req, res) =>{
     try{
 
-        const id = req.query.id;
-        const idProducto = req.query.idProducto;
+        const id = req.body.id;
+        const idProducto = req.body.idProducto;
 
         deleteProducto(id, idProducto);
         res.json("Se elimino el producto");
@@ -86,7 +98,11 @@ router.get('/ListadoProducto', parser, async (req, res) =>{
 
         const id = req.query.id;
 
-        getProducto(id, res);
+        const arrayProductos = await getProducto(id, res);
+        res.json(arrayProductos);
+        console.log(arrayProductos);
+
+        
     
         
         }catch(error){
@@ -95,26 +111,26 @@ router.get('/ListadoProducto', parser, async (req, res) =>{
 
 })
 
-router.get('/ModificarProducto', parser, async (req, res) =>{
+router.put('/ModificarProducto', parser, async (req, res) =>{
     try{
 
-        const id = req.query.id;
-        const categoriaProducto = req.query.categoriaProducto;
-        const nameProducto = req.query.nameProducto;
-        const precioProducto = req.query.precioProducto;
-        const tipoDeProducto = req.query.tipoDeProducto;
+        const id = req.body.id;
+        const categoriaProducto = req.body.categoriaProducto;
+        const nameProducto = req.body.nameProducto;
+        const precioProducto = req.body.precioProducto;
+        const tipoDeProducto = req.body.tipoDeProducto;
         const idProducto = req.query.idProducto;
         
 
-        validacion = await encontreProducto(nameProducto, id);
+        validacion = await validacionModificar(id, idProducto);
         console.log(validacion);
 
-        if(validacion==false){
+        if(validacion==true){
             modifyProducto(id, categoriaProducto, nameProducto, precioProducto, tipoDeProducto, idProducto);
             res.json("Se modifico el producto");
         } 
         else{
-            res.json("Ya existe el nombre de este producto");
+            res.json("No existe el producto");
         }
         }catch(error){
         console.log(error);
@@ -185,17 +201,17 @@ async function deleteProducto(id, idProducto){
     
     db.collection("Marca").doc(id).collection("Productos").doc(idProducto).delete();
 }
-
-async function getProducto(id, res){
+async function getProducto(id){
 
     const productosRef = db.collection('Marca').doc(id).collection("Productos");
     const snapshot = await productosRef.get();
     const arrayProductos = [];
+    console.log(snapshot);
     snapshot.forEach(doc => {
         console.log(doc.id, '=>', doc.data());
         arrayProductos.push(doc.data());
 });
-    res.json(arrayProductos);
+    return(arrayProductos);
 }
 
 
@@ -246,10 +262,27 @@ async function encontreProducto(nameProducto, id) {
 }
 
 
+async function validacionModificar(id, idProducto) {
+    const snapshot = await db.collection("Marca").doc(id).collection("Productos").where('idProducto', '==', idProducto).get();
+    let validacion = false;
+    if(!snapshot.empty){
+        console.log("");
+        validacion = true;
+        return validacion;
+    } else {
+     return validacion;
+    }
+ }
+ 
+ 
+
+
 /*
 
-- Cambiar todo a req.body
-
+- Cambiar todo a req.query
+- Ver Heroku
+- Validar cada tipo de producto (indumentaria, tecnologia, deportes), que dependiendo del tipo de producto que sea, tenga unos campos u otros.
+- Empezar con usuarios (log in, registrarse)
 
 
 
@@ -258,16 +291,21 @@ async function encontreProducto(nameProducto, id) {
 
   
 module.exports = router;
+/*module.exports = {
+    "setMarca": setMarca
+}*/
 
 
 
 
 // 
 
-//http://localhost:8000/BorrarProducto/?id=634643643&nameProducto=remeraceleste
+//https://mainshop-nodejs.herokuapp.com/BorrarProducto/?id=634643643&nameProducto=remeraceleste
 
-//http://localhost:8000/ListadoProducto/?id=634643643
+//https://mainshop-nodejs.herokuapp.com/ListadoProducto/?id=634643643
 
-//http://localhost:8000/AgregarProducto/?id=634643643&categoriaProducto=ropa&nameProducto=remeraprueba&precioProducto=500&tipoDeProducto=remera&idProducto=jfbsdfbsd
+//https://mainshop-nodejs.herokuapp.com/AgregarProducto/?id=634643643&categoriaProducto=ropa&nameProducto=remeraprueba&precioProducto=500&tipoDeProducto=remera&idProducto=jfbsdfbsd
+
+//https://mainshop-nodejs.herokuapp.com/ModificarProducto/?id=634643643&categoriaProducto=ropa&nameProducto=remerabasica&precioProducto=500&tipoDeProducto=remera&idProducto=aNV4JhIYw07hU8RxTwNA
 
 //http://localhost:8000/ModificarProducto/?id=634643643&categoriaProducto=ropa&nameProducto=remerabasica&precioProducto=500&tipoDeProducto=remera&idProducto=aNV4JhIYw07hU8RxTwNA
