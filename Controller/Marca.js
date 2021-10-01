@@ -142,21 +142,7 @@ function createMarcaObject(Marca){
   }
 
 
-async function setMarca(id, name, password, email, categoria, cuit, razonSocial, condicionFrenteAlIva, numeroIngresosBrutos, suscripcion, idPlantilla){
-    
-    db.collection("Marca").doc(id).set({
-            name: name,
-            password: password,
-            email: email,
-            categoria: categoria,
-            cuit: cuit,
-            razonSocial: razonSocial,
-            condicionFrenteAlIva: condicionFrenteAlIva,
-            numeroIngresosBrutos: numeroIngresosBrutos,
-            suscripcion: suscripcion,
-            idPlantilla: idPlantilla
-    })
-}
+
 
 
 
