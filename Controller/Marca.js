@@ -59,10 +59,6 @@ router.post('/AgregarProducto', parser, async (req, res) =>{
 
         if(validacion == false) {
             setProducto(id, categoriaProducto, nameProducto, precioProducto, tipoDeProducto, idProducto);
-            response.setHeader("Access-Control-Allow-Origin", "*");
-            response.setHeader("Access-Control-Allow-Credentials", "true");
-            response.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
-            response.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
             res.json("Se agregó el producto");
         } else {
             res.json("El nombre del producto que quiere agregar ya existe");
@@ -78,12 +74,12 @@ router.get('/ping', parser, async (req, res) =>{
     res.send("pong");
 })
 
-router.delete('/BorrarProducto', parser, async (req, res) =>{
+router.post('/BorrarProducto', parser, async (req, res) =>{
     try{
 
         const id = req.body.id;
         const idProducto = req.body.idProducto;
-
+        console.log(id);
         deleteProducto(id, idProducto);
         res.json("Se elimino el producto");
         }catch(error){
@@ -177,6 +173,7 @@ async function getMarcaById(id) {
 }
 
 async function setProducto(id, categoriaProducto, nameProducto, precioProducto, tipoDeProducto, idProducto){
+    console.log(id);
     db.collection("Marca").doc(id).collection("Productos").doc(idProducto).set({
         categoriaProducto: categoriaProducto,
         nameProducto : nameProducto,
@@ -198,6 +195,8 @@ async function modifyProducto(id, categoriaProducto, nameProducto, precioProduct
 
 
 async function deleteProducto(id, idProducto){
+    console.log(id);
+    console.log(idProducto);
     
     db.collection("Marca").doc(id).collection("Productos").doc(idProducto).delete();
 }
@@ -249,6 +248,7 @@ async function validate(email) {
 
 
 async function encontreProducto(nameProducto, id) {
+    console.log(nameProducto);
    const snapshot = await db.collection("Marca").doc(id).collection("Productos").where('nameProducto', '==', nameProducto).get();
    let validacion = false;
    if(!snapshot.empty){

@@ -1,17 +1,13 @@
 var express = require('express');
 const app = express();
-var cors = require('cors');
 
-app.use(cors({
-    origin: "*",
-}));
 
-/* app.use((req, res, next) => {
+app.use((req, res, next) => {
     res.append('Access-Control-Allow-Origin', ['*']);
     res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
     res.append('Access-Control-Allow-Headers', 'Content-Type');
     next();
-}); */
+});
 
 app.set("PORT", process.env.PORT || 8000)
 /* app.use(function (req, res, next) {  
@@ -42,7 +38,7 @@ app.use('/', ProfileData)
 app.use('/', Factory)
 app.use('/', MarcaData)
 app.use('/', UsuariosData)
-app.use('/', cors())
+
 
 app.listen(app.get("PORT"), () => {
     console.log('API RUNNING AT: localhost:${app.get("PORT")}')
