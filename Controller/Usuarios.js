@@ -29,6 +29,7 @@ router.post('/UsuarioRegistro', parser, async (req, res) =>{
         const numeroIngresosBrutos = req.body.numeroIngresosBrutos;
         const suscripcion = req.body.suscripcion;
         const idPlantilla = req.body.idPlantilla;
+        const logo = req.body.logo;
 
         let validacion = await validate(email);
 
@@ -39,7 +40,7 @@ router.post('/UsuarioRegistro', parser, async (req, res) =>{
             }else{
                 const validacion = await validateMarca(email);
 
-                setMarca(id, name, password, email, categoria, cuit, razonSocial, condicionFrenteAlIva, numeroIngresosBrutos, suscripcion, idPlantilla);
+                setMarca(id, name, password, email, categoria, cuit, razonSocial, condicionFrenteAlIva, numeroIngresosBrutos, suscripcion, idPlantilla, logo, tipoCuenta);
             }
         
         }else{
@@ -145,7 +146,7 @@ router.get('/TraerTipo', parser, async (req, res) =>{
 
 //FUNCIONES
 
-async function setMarca(id, name, password, email, categoria, cuit, razonSocial, condicionFrenteAlIva, numeroIngresosBrutos, suscripcion, idPlantilla){
+async function setMarca(id, name, password, email, categoria, cuit, razonSocial, condicionFrenteAlIva, numeroIngresosBrutos, suscripcion, idPlantilla, logo){
     
     db.collection("Marca").doc(id).set({
             name: name,
@@ -157,7 +158,9 @@ async function setMarca(id, name, password, email, categoria, cuit, razonSocial,
             condicionFrenteAlIva: condicionFrenteAlIva,
             numeroIngresosBrutos: numeroIngresosBrutos,
             suscripcion: suscripcion,
-            idPlantilla: idPlantilla
+            idPlantilla: idPlantilla,
+            logo: logo,
+            tipoCuenta: tipoCuenta
     })
 }
 
@@ -186,13 +189,13 @@ async function modifyProducto(id, name, password){
 
 async function getMarcas(){
 
-    const marcasRef = db.collection('Marca').doc();
+    const marcasRef = db.collection('Marca');
     const snapshot = await marcasRef.get();
     const arrayMarcas = [];
     console.log(snapshot);
     snapshot.forEach(doc => {
     console.log(doc.id, '=>', doc.data());
-    arrayProductos.push(doc.data());
+    arrayMarcas.push(doc.data());
     });
     return(arrayMarcas);
     }
@@ -213,16 +216,14 @@ async function agregarAlCarrito(idMarca,idProducto, idUsuario, idCarrito){
 }
 
 async function validarTipo(id){
-    const snapshot = await db.collection("Marca").get();
-    snapshot.forEach(element => {
-        if(element.id==id){
-            const tipo = "Marca";
-            return tipo;
-        }
-        });
-   
+    const snapshot = await db.collection("Marca").doc("AaArNePZN34u5GU7spxS5khE2").get();
+    let tipo = "Usuario";
+    if(snapshot == undefined) {
+        tipo = "Marca";
+    } else {
+        tipo = "Usuario";
+    }
 
-    const tipo = "Usuario"
     return tipo;
 }
 
