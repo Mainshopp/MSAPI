@@ -216,7 +216,7 @@ async function agregarAlCarrito(idMarca,idProducto, idUsuario, idCarrito){
 }
 
 async function validarTipo(id){
-    const snapshot = await db.collection("Marca").doc("AaArNePZN34u5GU7spxS5khE2").get();
+    const snapshot = await db.collection("Marca").doc(id).get();
     let tipo = "Usuario";
     if(snapshot == undefined) {
         tipo = "Marca";
