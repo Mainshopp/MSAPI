@@ -195,7 +195,7 @@ async function getMarcas(){
     console.log(snapshot);
     snapshot.forEach(doc => {
     console.log(doc.id, '=>', doc.data());
-    arrayMarcas.push(doc.data());
+    arrayMarcas.push({...doc.data(), id: doc.id});
     });
     return(arrayMarcas);
     }
@@ -217,8 +217,9 @@ async function agregarAlCarrito(idMarca,idProducto, idUsuario, idCarrito){
 
 async function validarTipo(id){
     const snapshot = await db.collection("Marca").doc(id).get();
+    console.log(snapshot.data());
     let tipo = "Usuario";
-    if(snapshot == undefined) {
+    if(snapshot.data() != undefined) {
         tipo = "Marca";
     } else {
         tipo = "Usuario";
