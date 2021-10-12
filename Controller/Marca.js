@@ -53,12 +53,13 @@ router.post('/AgregarProducto', parser, async (req, res) =>{
         const precioProducto = req.body.precioProducto;
         const tipoDeProducto = req.body.tipoDeProducto;
         const idProducto = req.body.idProducto;
+        const imagen = req.body.imagen;
 
         validacion = await encontreProducto(nameProducto, id);
         console.log(validacion);
 
         if(validacion == false) {
-            setProducto(id, categoriaProducto, nameProducto, precioProducto, tipoDeProducto, idProducto);
+            setProducto(id, categoriaProducto, nameProducto, precioProducto, tipoDeProducto, imagen, idProducto);
             res.json("Se agregó el producto");
         } else {
             res.json("El nombre del producto que quiere agregar ya existe");
@@ -158,13 +159,14 @@ async function getMarcaById(id) {
     }
 }
 
-async function setProducto(id, categoriaProducto, nameProducto, precioProducto, tipoDeProducto, idProducto){
+async function setProducto(id, categoriaProducto, nameProducto, precioProducto, tipoDeProducto, imagen, idProducto){
     console.log(id);
     db.collection("Marca").doc(id).collection("Productos").doc(idProducto).set({
         categoriaProducto: categoriaProducto,
         nameProducto : nameProducto,
         precioProducto : precioProducto,
         tipoDeProducto : tipoDeProducto,
+        imagen: imagen,
         idProducto : idProducto
     });
 }
