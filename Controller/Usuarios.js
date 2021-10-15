@@ -116,9 +116,8 @@ router.get('/AgregarAlCarrito', parser, async (req, res) =>{
         const idMarca = req.query.idMarca;
         const idProducto = req.query.idProducto;
         const idUsuario=req.query.idUsuario;
-        const idCarrito = req.query.idCarrito;
         
-        const productoAgregar=agregarAlCarrito(idMarca, idProducto, idUsuario, idCarrito)
+        const productoAgregar= await agregarAlCarrito(idMarca, idProducto, idUsuario);
         console.log(productoAgregar);
         res.json("Se agrego el producto al carrito");
         
@@ -202,16 +201,30 @@ async function getMarcas(){
 
 
 
-async function agregarAlCarrito(idMarca,idProducto, idUsuario, idCarrito){
+async function agregarAlCarrito(idMarca, idProducto, idUsuario){
 
-    const productoAgregar=db.collection("Marca").doc(idMarca).collection("Productos").doc(idProducto).get();
+    const snapshot= await db.collection("Marca").doc(idMarca).collection("Productos").doc(idProducto).get();
+    console.log(snapshot.data());
+    const productoAgregar = snapshot.data();
 
-    db.collection("Usuarios").doc(idUsuario).collection("Carrito").doc(idCarrito).set({
-        categoria: productoAgregar.categoriaProducto,
-        nombre: productoAgregar.nameProducto,
-        precio: productoAgregar.precioProducto,
-        tipoDeProducto: productoAgregar.tipoDeProducto
-    });
+    let validacion=validateProdCarrito(idUsuario, idProducto);
+    console.log(validacion);
+
+    if(!validacion){
+        db.collection("Usuarios").doc(idUsuario).collection("Carrito").doc(idProducto).set({
+            categoria: productoAgregar.categoriaProducto,
+            nombre: productoAgregar.nameProducto,
+            precio: productoAgregar.precioProducto,
+            tipoDeProducto: productoAgregar.tipoDeProducto,
+            idProducto: productoAgregar.idProducto,
+            cantidad: 1
+        });
+    }else {
+        db.collection("Usuarios").doc(idUsuario).collection("Carrito").doc(idProducto).update({
+            cantidad: cantidad + 1
+        })
+    }
+    
     return productoAgregar;
 }
 
@@ -227,11 +240,6 @@ async function validarTipo(id){
 
     return tipo;
 }
-
-
-
-
-
 
 //VALIDACIONES
 
@@ -272,6 +280,21 @@ async function validacionModificar(id) {
     } else {
      return validacion;
     }
+ }
+
+ async function validateProdCarrito(idUsuario, idProducto) {
+    const snapshot = await db.collection("Usuarios").doc(idUsuario).collection("Carrito").doc(idProducto).where('idProducto', '==', idProducto).get();
+    let validacion = false;
+    if(!snapshot.empty){
+        console.log("Ya hay un producto");
+        validacion = true;
+        return validacion;
+    } else {
+        console.log("No está este producto en el carrito")
+     return validacion;
+    }
+    
+
  }
   
 module.exports = router;
