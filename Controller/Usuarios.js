@@ -201,7 +201,7 @@ async function getMarcas(){
 
 
 
-async function agregarAlCarrito(idMarca, idProducto, idUsuario){
+async function agregarAlCarrito(idMarca, idProducto, idUsuario) {
 
     const snapshot= await db.collection("Marca").doc(idMarca).collection("Productos").doc(idProducto).get();
     console.log(snapshot.data());
@@ -210,8 +210,8 @@ async function agregarAlCarrito(idMarca, idProducto, idUsuario){
     let validacion=validateProdCarrito(idUsuario, idProducto);
     console.log(validacion);
 
-    if(!validacion){
-        db.collection("Usuarios").doc(idUsuario).collection("Carrito").doc(idProducto).set({
+    if(!validacion) {
+        db.collection("Usuarios").doc(idUsuario).collection("Carrito").doc().set({
             categoria: productoAgregar.categoriaProducto,
             nombre: productoAgregar.nameProducto,
             precio: productoAgregar.precioProducto,
@@ -219,10 +219,10 @@ async function agregarAlCarrito(idMarca, idProducto, idUsuario){
             idProducto: productoAgregar.idProducto,
             cantidad: 1
         });
-    }else {
-        db.collection("Usuarios").doc(idUsuario).collection("Carrito").doc(idProducto).update({
+    } else {
+        /*db.collection("Usuarios").doc(idUsuario).collection("Carrito").doc(idProducto).update({
             cantidad: cantidad + 1
-        })
+        })*/
     }
     
     return productoAgregar;
@@ -283,17 +283,17 @@ async function validacionModificar(id) {
  }
 
  async function validateProdCarrito(idUsuario, idProducto) {
-    const snapshot = await db.collection("Usuarios").doc(idUsuario).collection("Carrito").doc(idProducto).where('idProducto', '==', idProducto).get();
+    const snapshot = await db.collection("Usuarios").doc(idUsuario).collection("Carrito").where('idProducto', '==', idProducto).get();
+    console.log(snapshot.data);
     let validacion = false;
     if(!snapshot.empty){
         console.log("Ya hay un producto");
         validacion = true;
-        return validacion;
     } else {
-        console.log("No está este producto en el carrito")
-     return validacion;
+        console.log("No está este producto en el carrito");
     }
-    
+
+    return validacion;
 
  }
   
