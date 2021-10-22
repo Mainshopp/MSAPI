@@ -116,10 +116,29 @@ router.get('/AgregarAlCarrito', parser, async (req, res) =>{
         const idMarca = req.query.idMarca;
         const idProducto = req.query.idProducto;
         const idUsuario=req.query.idUsuario;
-        
+
         const productoAgregar= await agregarAlCarrito(idMarca, idProducto, idUsuario);
         console.log(productoAgregar);
         res.json("Se agrego el producto al carrito");
+        
+
+        }catch(error){
+        console.log(error);
+    }
+
+})
+
+
+
+
+router.get('/EliminarDelCarrito', parser, async (req, res) =>{
+    try{
+
+        const idProducto = req.query.idProducto;
+        const idUsuario=req.query.idUsuario;
+
+        eliminarProductoCarrito(idProducto, idUsuario);
+        res.json("Se elimino el producto");
         
 
         }catch(error){
@@ -207,11 +226,13 @@ async function agregarAlCarrito(idMarca, idProducto, idUsuario) {
     console.log(snapshot.data());
     const productoAgregar = snapshot.data();
 
-    let validacion=validateProdCarrito(idUsuario, idProducto);
-    console.log(validacion);
+        let validacion= await existeProductoCarrito(idUsuario, idProducto);
+        console.log(validacion);
 
-    if(!validacion) {
-        db.collection("Usuarios").doc(idUsuario).collection("Carrito").doc().set({
+
+
+        if(!validacion) {
+        db.collection("Usuarios").doc(idUsuario).collection("Carrito").doc(idProducto).set({
             categoria: productoAgregar.categoriaProducto,
             nombre: productoAgregar.nameProducto,
             precio: productoAgregar.precioProducto,
@@ -220,26 +241,34 @@ async function agregarAlCarrito(idMarca, idProducto, idUsuario) {
             cantidad: 1
         });
     } else {
-        /*db.collection("Usuarios").doc(idUsuario).collection("Carrito").doc(idProducto).update({
-            cantidad: cantidad + 1
-        })*/
+        const snapshot2 = await db.collection("Usuarios").doc(idUsuario).collection("Carrito").doc(idProducto).get();
+        const snapshot3 = snapshot2.data();
+        const cantidadCarrito = snapshot3.cantidad;
+        console.log(snapshot3);
+        db.collection("Usuarios").doc(idUsuario).collection("Carrito").doc(idProducto).update({
+            cantidad: cantidadCarrito + 1
+        })
     }
     
     return productoAgregar;
 }
 
-async function validarTipo(id){
-    const snapshot = await db.collection("Marca").doc(id).get();
-    console.log(snapshot.data());
-    let tipo = "Usuario";
-    if(snapshot.data() != undefined) {
-        tipo = "Marca";
-    } else {
-        tipo = "Usuario";
-    }
 
-    return tipo;
+
+async function eliminarProductoCarrito(idProducto, idUsuario){
+    const snapshot2 = await db.collection("Usuarios").doc(idUsuario).collection("Carrito").doc(idProducto).get();
+    const snapshot3 = snapshot2.data();
+    const cantidadCarrito = snapshot3.cantidad;
+    if (cantidadCarrito>1){
+        db.collection("Usuarios").doc(idUsuario).collection("Carrito").doc(idProducto).update({
+            cantidad: cantidadCarrito -1
+        })
+    }else {
+        db.collection("Usuarios").doc(idUsuario).collection("Carrito").doc(idProducto).delete();
+    }
 }
+
+
 
 //VALIDACIONES
 
@@ -255,6 +284,19 @@ async function validate(email) {
        return validacion = true;
    }
 
+}
+
+async function validarTipo(id){
+    const snapshot = await db.collection("Marca").doc(id).get();
+    console.log(snapshot.data());
+    let tipo = "Usuario";
+    if(snapshot.data() != undefined) {
+        tipo = "Marca";
+    } else {
+        tipo = "Usuario";
+    }
+
+    return tipo;
 }
 
 async function validateMarca(email) {
@@ -282,11 +324,10 @@ async function validacionModificar(id) {
     }
  }
 
- async function validateProdCarrito(idUsuario, idProducto) {
-    const snapshot = await db.collection("Usuarios").doc(idUsuario).collection("Carrito").where('idProducto', '==', idProducto).get();
-    console.log(snapshot.data);
+ async function existeProductoCarrito(idUsuario, idProducto) {
+    const snapshot = await db.collection("Usuarios").doc(idUsuario).collection("Carrito").doc(idProducto).get();
     let validacion = false;
-    if(!snapshot.empty){
+    if(snapshot.data() != undefined){
         console.log("Ya hay un producto");
         validacion = true;
     } else {
