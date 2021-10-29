@@ -54,12 +54,14 @@ router.post('/AgregarProducto', parser, async (req, res) =>{
         const tipoDeProducto = req.body.tipoDeProducto;
         const idProducto = req.body.idProducto;
         const imagen = req.body.imagen;
+        const talles = req.body.talles;
+        console.log(talles);
 
         validacion = await encontreProducto(nameProducto, id);
         console.log(validacion);
 
         if(validacion == false) {
-            setProducto(id, categoriaProducto, nameProducto, precioProducto, tipoDeProducto, imagen, idProducto);
+            setProducto(id, categoriaProducto, nameProducto, precioProducto, tipoDeProducto, imagen, idProducto, talles);
             res.json("Se agregó el producto");
         } else {
             res.json("El nombre del producto que quiere agregar ya existe");
@@ -146,9 +148,6 @@ function createMarcaObject(Marca){
 
 
 
-
-
-
 async function getMarcaById(id) {
     const snapshot = await db.collection("Marca").doc(id).get();
     
@@ -159,7 +158,7 @@ async function getMarcaById(id) {
     }
 }
 
-async function setProducto(id, categoriaProducto, nameProducto, precioProducto, tipoDeProducto, imagen, idProducto){
+async function setProducto(id, categoriaProducto, nameProducto, precioProducto, tipoDeProducto, imagen, idProducto, arrayTalles){
     console.log(id);
     db.collection("Marca").doc(id).collection("Productos").doc(idProducto).set({
         categoriaProducto: categoriaProducto,
@@ -167,7 +166,12 @@ async function setProducto(id, categoriaProducto, nameProducto, precioProducto, 
         precioProducto : precioProducto,
         tipoDeProducto : tipoDeProducto,
         imagen: imagen,
-        idProducto : idProducto
+        idProducto : idProducto,
+        descripcion:{
+            talle : arrayTalles,
+            color: ["PINK"],
+            texto:""
+        }
     });
 }
 

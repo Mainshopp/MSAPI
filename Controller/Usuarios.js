@@ -160,9 +160,30 @@ router.get('/TraerTipo', parser, async (req, res) =>{
 
 })
 
+router.get('/GetCarrito', parser, async (req, res) =>{
+    try{
+        const idUsuario = req.body.idUsuario;
+        const snapshot = getCarrito(idUsuario);
+        res.json(snapshot);
+    
+        }catch(error){
+        console.log(error);
+    }
+
+})
+
 
 
 //FUNCIONES
+
+async function getCarrito(idUsuario){
+    const ref = db.collection("Usuarios").doc(idUsuario);
+    const snapshot = await ref.get();
+    console.log("carrit"+snapshot.data);
+    if(!snapshot.empty){
+        return snapshot.Carrito;
+    }
+}
 
 async function setMarca(id, name, password, email, categoria, cuit, razonSocial, condicionFrenteAlIva, numeroIngresosBrutos, suscripcion, idPlantilla, logo){
     
